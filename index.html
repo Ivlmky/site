@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Цифровой центр проекта</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    background: #0e1117;
+    color: #e6edf3;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 40px 24px 24px;
+    text-align: center;
+    background: radial-gradient(circle at 50% -20%, #1f6feb55, transparent 60%);
+    border-bottom: 1px solid #21262d;
+  }
+
+  header h1 {
+    font-size: clamp(24px, 4vw, 40px);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, #58a6ff, #a371f7, #f778ba);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  header p {
+    margin-top: 10px;
+    color: #8b949e;
+    font-size: 15px;
+    max-width: 660px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 20px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    background: #0e1117ee;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10;
+    border-bottom: 1px solid #21262d;
+  }
+
+  .tab-btn {
+    background: #161b22;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 10px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all .2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+
+  .tab-btn:hover {
+    border-color: #58a6ff;
+    color: #58a6ff;
+    transform: translateY(-1px);
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, #1f6feb, #8957e5);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 20px #1f6feb55;
+  }
+
+  .tab-btn .num {
+    opacity: .6;
+    margin-right: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .tab-content { display: none; animation: fade .35s ease; }
+  .tab-content.active { display: block; }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    font-size: 26px;
+    margin-bottom: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h2::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 26px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #58a6ff, #a371f7);
+  }
+
+  h3 { font-size: 18px; margin: 22px 0 10px; color: #58a6ff; }
+
+  p { color: #c9d1d9; margin-bottom: 12px; }
+
+  .card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 16px;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: #30363d; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .step {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .step::before {
+    content: attr(data-step);
+    position: absolute;
+    top: 12px; right: 18px;
+    font-size: 40px;
+    font-weight: 900;
+    color: #1f6feb22;
+    line-height: 1;
+  }
+  .step h4 { color: #fff; margin-bottom: 10px; font-size: 16px; }
+  .step p { font-size: 14px; color: #c9d1d9; margin: 0; }
+  .step p + p { margin-top: 8px; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin: 20px 0 0;
+  }
+  .stat {
+    background: linear-gradient(135deg, #161b22, #1c2230);
+    border: 1px solid #30363d;
+    border-radius: 14px;
+    padding: 20px 16px;
+    text-align: center;
+  }
+  .stat .value {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(90deg, #58a6ff, #a371f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    line-height: 1.1;
+  }
+  .stat .label {
+    font-size: 12.5px;
+    color: #8b949e;
+    margin-top: 8px;
+    line-height: 1.35;
+  }
+
+  /* ==== Чёрные плашки «видео» ==== */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+  }
+
+  .video-card {
+    position: relative;
+    background: #000;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    cursor: pointer;
+    transition: transform .25s, border-color .25s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .video-card:hover {
+    transform: translateY(-3px);
+    border-color: #58a6ff;
+  }
+
+  .video-card .play {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .25s ease;
+    padding-left: 5px;
+  }
+  .video-card:hover .play {
+    background: rgba(88,166,255,0.25);
+    border-color: #58a6ff;
+    box-shadow: 0 0 0 8px rgba(88,166,255,0.12);
+  }
+  .video-card .play svg {
+    width: 26px; height: 26px;
+    fill: rgba(255,255,255,0.85);
+  }
+
+  .video-card .label {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 26px 16px 14px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.9));
+    color: #fff;
+    z-index: 2;
+  }
+  .video-card .label strong {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .video-card .label span {
+    font-size: 12.5px;
+    color: #8b949e;
+  }
+
+  .video-card .badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.9);
+    background: rgba(0,0,0,0.6);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.15);
+    z-index: 2;
+  }
+
+  /* Компактный список записей встреч */
+  .rec-item {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    transition: border-color .2s;
+  }
+  .rec-item:hover { border-color: #58a6ff; }
+
+  .rec-thumb {
+    position: relative;
+    flex: 0 0 160px;
+    aspect-ratio: 16 / 10;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rec-thumb .play-mini {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 4px;
+    transition: all .2s;
+  }
+  .rec-item:hover .rec-thumb .play-mini {
+    background: rgba(88,166,255,0.25);
+    border-color: #58a6ff;
+  }
+  .rec-thumb .play-mini svg {
+    width: 16px; height: 16px;
+    fill: rgba(255,255,255,0.85);
+  }
+
+  .rec-info { flex: 1; }
+  .rec-info strong {
+    display: block;
+    color: #fff;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .rec-info span {
+    font-size: 13px;
+    color: #8b949e;
+  }
+
+  .rec-item .duration {
+    font-size: 13px;
+    color: #c9d1d9;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    padding: 5px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  /* Эксперты */
+  .expert-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 22px;
+    text-align: center;
+    transition: border-color .2s, transform .25s;
+  }
+  .expert-card:hover {
+    border-color: #58a6ff;
+    transform: translateY(-3px);
+  }
+  .expert-photo {
+    width: 84px; height: 84px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    background: #000;
+    border: 2px solid #30363d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .expert-photo::after {
+    content: '';
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1f6feb, #a371f7);
+    opacity: .55;
+  }
+  .expert-card h4 {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .expert-card .role {
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 14px;
+  }
+  .expert-card .soon {
+    display: inline-block;
+    font-size: 12px;
+    color: #58a6ff;
+    background: #1f6feb22;
+    border: 1px solid #1f6feb55;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+
+  /* FAQ */
+  details {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  details[open] { border-color: #58a6ff; }
+  summary {
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    list-style: none;
+    position: relative;
+    padding-right: 24px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+';
+    position: absolute;
+    right: 0; top: -2px;
+    color: #58a6ff;
+    font-size: 20px;
+    transition: transform .2s;
+  }
+  details[open] summary::after { content: '−'; }
+  details p { margin-top: 12px; color: #8b949e; font-size: 14.5px; }
+
+  /* Форма */
+  form {
+    display: grid;
+    gap: 14px;
+    max-width: 560px;
+  }
+  label { font-size: 13px; color: #8b949e; margin-bottom: -8px; }
+  input, textarea, select {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #e6edf3;
+    font-family: inherit;
+    font-size: 14.5px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: #58a6ff;
+    box-shadow: 0 0 0 3px #1f6feb22;
+  }
+  textarea { resize: vertical; min-height: 110px; }
+  .btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #1f6feb, #8957e5);
+    color: #fff;
+    padding: 12px 26px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14.5px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform .15s;
+    font-family: inherit;
+    justify-self: start;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .form-note { font-size: 12px; color: #6e7681; }
+  .success {
+    display: none;
+    background: #1f6feb22;
+    border: 1px solid #1f6feb;
+    color: #58a6ff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-top: 12px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    border-top: 1px solid #21262d;
+    color: #6e7681;
+    font-size: 13px;
+  }
+
+  @media (max-width: 600px) {
+    header { padding: 30px 18px 20px; }
+    main { padding: 30px 18px 60px; }
+    .tabs { padding: 14px 12px; }
+    .tab-btn { font-size: 12.5px; padding: 8px 13px; }
+    h2 { font-size: 22px; }
+    .rec-item { flex-direction: column; align-items: stretch; }
+    .rec-thumb { flex: none; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Цифровой центр проекта</h1>
+  <p>Новая энергосистема Соловецкого архипелага: солнечная станция, резервная дизельная станция и подводный кабель с материка</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="t1"><span class="num">01</span>Простое объяснение технологии</button>
+  <button class="tab-btn" data-tab="t2"><span class="num">02</span>Как это работает</button>
+  <button class="tab-btn" data-tab="t3"><span class="num">03</span>Этапы реализации проекта</button>
+  <button class="tab-btn" data-tab="t4"><span class="num">04</span>Три фильма</button>
+  <button class="tab-btn" data-tab="t5"><span class="num">05</span>Записи открытых встреч</button>
+  <button class="tab-btn" data-tab="t6"><span class="num">06</span>Интервью экспертов</button>
+  <button class="tab-btn" data-tab="t7"><span class="num">07</span>FAQ</button>
+  <button class="tab-btn" data-tab="t8"><span class="num">08</span>Задать вопрос</button>
+</nav>
+
+<main>
+
+  <!-- 01 -->
+  <section id="t1" class="tab-content active">
+    <h2>Простое объяснение технологии</h2>
+
+    <div class="card">
+      <p>Соловецкий архипелаг — объект Всемирного наследия ЮНЕСКО. Здесь находятся монастырь, посёлок, туристические и научные объекты. Энергию на остров сегодня завозят дизелем с материка — это дорого, экологически грязно и зависит от навигации.</p>
+      <p>Проект меняет эту ситуацию: остров получит собственную солнечную генерацию, современную дизельную станцию в качестве резерва и две подводные кабельные линии с материка.</p>
+    </div>
+
+    <h3>Что меняется</h3>
+    <div class="grid">
+      <div class="card">
+        <h4 style="color:#fff; margin-bottom:8px; font-size:16px;">Сейчас</h4>
+        <p style="font-size:14.5px; color:#8b949e; margin:0;">Одна старая дизельная станция в водоохранной зоне у Святого озера. К 2027 году острову понадобится в пять раз больше мощности.</p>
+      </div>
+      <div class="card">
+        <h4 style="color:#fff; margin-bottom:8px; font-size:16px;">Станет</h4>
+        <p style="font-size:14.5px; color:#8b949e; margin:0;">Солнечная станция 8 МВт, новая дизельная станция как резерв, две подводные линии по 54 км из Кеми. Единая энергосистема острова.</p>
+      </div>
+      <div class="card">
+        <h4 style="color:#fff; margin-bottom:8px; font-size:16px;">Что получаем</h4>
+        <p style="font-size:14.5px; color:#8b949e; margin:0;">Топливо почти не нужно, выбросы CO₂ в 3 раза меньше, киловатт-час в 2,4 раза дешевле. Старая станция у Святого озера демонтируется.</p>
+      </div>
+    </div>
+
+    <h3>Ключевые показатели</h3>
+    <div class="stats">
+      <div class="stat">
+        <div class="value">8 МВт</div>
+        <div class="label">мощность солнечной станции</div>
+      </div>
+      <div class="stat">
+        <div class="value">28 %</div>
+        <div class="label">доля солнца летом</div>
+      </div>
+      <div class="stat">
+        <div class="value">2 × 54 км</div>
+        <div class="label">подводные кабельные линии</div>
+      </div>
+      <div class="stat">
+        <div class="value">×2,4</div>
+        <div class="label">дешевле киловатт-час</div>
+      </div>
+      <div class="stat">
+        <div class="value">×3</div>
+        <div class="label">меньше выбросов CO₂</div>
+      </div>
+      <div class="stat">
+        <div class="value">2027</div>
+        <div class="label">рост мощности в 5 раз</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section id="t2" class="tab-content">
+    <h2>Как это работает</h2>
+    <p>Четыре шага, из которых складывается новая энергосистема Соловков.</p>
+
+    <div class="grid">
+      <div class="step" data-step="1">
+        <h4>Проблема</h4>
+        <p>Сейчас на острове одна дизельная станция, и стоит она в водоохранной зоне — её нужно вынести.</p>
+        <p>К 2027 г. острову нужно в пять раз больше мощности.</p>
+      </div>
+      <div class="step" data-step="2">
+        <h4>Солнце и новая станция</h4>
+        <p>Новую дизельную станцию ставим у полигона ТБО, вдали от моря, озера и монастыря. Рядом — солнечную станцию 8 МВт.</p>
+        <p>Летом солнце даёт до 28 % энергии, топлива сжигается на 12 % меньше. Старую станцию у Святого озера демонтируем.</p>
+      </div>
+      <div class="step" data-step="3">
+        <h4>Кабель с материка</h4>
+        <p>Из Кеми по дну Белого моря идут две подводные линии по 54 км: если одну ремонтируют, вторая несёт весь остров.</p>
+        <p>Кабель выходит на берег в 0,7 км от построек, дальше линия обходит посёлок — туристам и монастырю она не мешает.</p>
+      </div>
+      <div class="step" data-step="4">
+        <h4>Итог</h4>
+        <p>Остров — в единой энергосистеме. Топливо почти не нужно, CO₂ — в 3 раза меньше, 1 кВт·ч — в 2,4 раза дешевле нынешнего тарифа.</p>
+        <p>Новая станция остаётся резервом.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section id="t3" class="tab-content">
+    <h2>Этапы реализации проекта</h2>
+
+    <div class="grid">
+      <div class="step" data-step="1">
+        <h4>Подготовка</h4>
+        <p>Проектно-изыскательские работы, экологическая экспертиза, согласования с администрацией, монастырём и охранными органами.</p>
+      </div>
+      <div class="step" data-step="2">
+        <h4>Строительство СЭС и новой ДЭС</h4>
+        <p>Солнечная станция 8 МВт и новая дизельная станция на площадке у полигона ТБО — вдали от моря, озера и монастыря.</p>
+      </div>
+      <div class="step" data-step="3">
+        <h4>Демонтаж старой станции</h4>
+        <p>Вывод из эксплуатации и демонтаж дизельной станции в водоохранной зоне у Святого озера.</p>
+      </div>
+      <div class="step" data-step="4">
+        <h4>Прокладка кабеля</h4>
+        <p>Две подводные линии из Кеми по дну Белого моря, по 54 км каждая. Выход на берег в 0,7 км от построек.</p>
+      </div>
+      <div class="step" data-step="5">
+        <h4>Синхронизация</h4>
+        <p>Объединение солнца, дизельной станции и кабеля в единую энергосистему острова. Настройка резервирования.</p>
+      </div>
+      <div class="step" data-step="6">
+        <h4>Ввод в эксплуатацию</h4>
+        <p>К 2027 году остров получает в пять раз больше мощности и переходит на новый тариф — в 2,4 раза ниже текущего.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section id="t4" class="tab-content">
+    <h2>Три фильма</h2>
+    <p>Серия коротких фильмов о проекте: до, во время и после запуска новой энергосистемы.</p>
+
+    <div class="video-grid">
+
+      <div class="video-card">
+        <span class="badge">🔒 Скоро</span>
+        <div class="play">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="label">
+          <strong>Фильм 1. До установки технологии</strong>
+          <span>Как остров живёт на старой дизельной станции сегодня</span>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <span class="badge">🔒 Скоро</span>
+        <div class="play">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="label">
+          <strong>Фильм 2. В момент запуска</strong>
+          <span>Строительство, монтаж и первые киловатты новой системы</span>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <span class="badge">🔒 Скоро</span>
+        <div class="play">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="label">
+          <strong>Фильм 3. Результат применения</strong>
+          <span>Как изменилась жизнь острова после запуска</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section id="t5" class="tab-content">
+    <h2>Записи открытых встреч</h2>
+    <p>Записи прошедших встреч и презентаций проекта. Новые — по мере проведения.</p>
+
+    <div class="rec-item">
+      <div class="rec-thumb">
+        <div class="play-mini">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div class="rec-info">
+        <strong>Встреча №1. Презентация проекта</strong>
+        <span>Общая идея, цели, состав работ</span>
+      </div>
+      <div class="duration">🔒 Скоро</div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-thumb">
+        <div class="play-mini">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div class="rec-info">
+        <strong>Встреча №2. Солнечная станция и новая ДЭС</strong>
+        <span>Технические решения, площадки, мощность 8 МВт</span>
+      </div>
+      <div class="duration">🔒 Скоро</div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-thumb">
+        <div class="play-mini">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div class="rec-info">
+        <strong>Встреча №3. Подводный кабель из Кеми</strong>
+        <span>Две линии по 54 км, выход на берег, обход посёлка</span>
+      </div>
+      <div class="duration">🔒 Скоро</div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-thumb">
+        <div class="play-mini">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div class="rec-info">
+        <strong>Встреча №4. Экология и охрана наследия</strong>
+        <span>Вынос станции из водоохранной зоны, выбросы, согласования</span>
+      </div>
+      <div class="duration">🔒 Скоро</div>
+    </div>
+
+    <div class="rec-item">
+      <div class="rec-thumb">
+        <div class="play-mini">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      </div>
+      <div class="rec-info">
+        <strong>Встреча №5. Тарифы и экономика проекта</strong>
+        <span>Почему 1 кВт·ч станет в 2,4 раза дешевле</span>
+      </div>
+      <div class="duration">🔒 Скоро</div>
+    </div>
+
+  </section>
+
+  <!-- 06 -->
+  <section id="t6" class="tab-content">
+    <h2>Интервью экспертов</h2>
+    <p>Интервью с экспертами по ключевым направлениям проекта.</p>
+
+    <div class="grid">
+
+      <div class="expert-card">
+        <div class="expert-photo"></div>
+        <h4>Энергетика</h4>
+        <div class="role">Режимы работы, синхронизация источников</div>
+        <span class="soon">🔒 Интервью скоро</span>
+      </div>
+
+      <div class="expert-card">
+        <div class="expert-photo"></div>
+        <h4>Экология</h4>
+        <div class="role">Воздействие на акваторию и охраняемые территории</div>
+        <span class="soon">🔒 Интервью скоро</span>
+      </div>
+
+      <div class="expert-card">
+        <div class="expert-photo"></div>
+        <h4>Морская инженерия</h4>
+        <div class="role">Прокладка и обслуживание подводного кабеля</div>
+        <span class="soon">🔒 Интервью скоро</span>
+      </div>
+
+      <div class="expert-card">
+        <div class="expert-photo"></div>
+        <h4>Охрана наследия</h4>
+        <div class="role">Сохранение ландшафта и согласования</div>
+        <span class="soon">🔒 Интервью скоро</span>
+      </div>
+
+      <div class="expert-card">
+        <div class="expert-photo"></div>
+        <h4>Экономика</h4>
+        <div class="role">Тарифная модель и срок окупаемости</div>
+        <span class="soon">🔒 Интервью скоро</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 07 -->
+  <section id="t7" class="tab-content">
+    <h2>FAQ</h2>
+
+    <details>
+      <summary>Почему нужно вынести старую станцию?</summary>
+      <p>Дизельная станция стоит в водоохранной зоне — рядом со Святым озером и монастырём. По природоохранным требованиям её нужно перенести. Новая площадка — у полигона ТБО, вдали от моря, озера и монастыря.</p>
+    </details>
+
+    <details>
+      <summary>Зачем солнечная станция на Севере?</summary>
+      <p>Летом на Соловках полярный день. В этот период солнце даёт до 28 % энергии, а сжигание топлива снижается на 12 %. Солнечная станция работает вместе с новой дизельной и подводным кабелем.</p>
+    </details>
+
+    <details>
+      <summary>Что будет, если кабель порвётся?</summary>
+      <p>Подводных линий две — по 54 км каждая. Если одну ремонтируют, вторая несёт всю нагрузку острова. Кроме того, новая дизельная станция остаётся резервом на случай любых внештатных ситуаций.</p>
+    </details>
+
+    <details>
+      <summary>Помешает ли кабель туристам и монастырю?</summary>
+      <p>Нет. Кабель выходит на берег в 0,7 км от построек, а линия обходит посёлок — туристам и монастырю она не мешает.</p>
+    </details>
+
+    <details>
+      <summary>Насколько дешевле станет электричество?</summary>
+      <p>Ожидаемая стоимость 1 кВт·ч — в 2,4 раза ниже нынешнего тарифа. Это результат отказа от дорогого дизельного топлива и перехода на солнечную генерацию и подводный кабель.</p>
+    </details>
+
+    <details>
+      <summary>Что с экологией?</summary>
+      <p>Выбросы CO₂ сокращаются в 3 раза, сжигание топлива — на 12 %. Станция выносится из водоохранной зоны, а солнечная генерация не даёт выбросов.</p>
+    </details>
+
+    <details>
+      <summary>Когда всё будет готово?</summary>
+      <p>Проект рассчитан до 2027 года. К этому сроку остров должен получить в пять раз больше мощности в единой энергосистеме.</p>
+    </details>
+  </section>
+
+  <!-- 08 -->
+  <section id="t8" class="tab-content">
+    <h2>Задать вопрос</h2>
+    <p>Заполните форму — мы ответим в течение одного рабочего дня.</p>
+
+    <form id="questionForm">
+      <label for="name">Ваше имя</label>
+      <input type="text" id="name" placeholder="Иван Иванов" required>
+
+      <label for="email">E-mail для ответа</label>
+      <input type="email" id="email" placeholder="you@example.com" required>
+
+      <label for="topic">Тема вопроса</label>
+      <select id="topic">
+        <option>Общие вопросы о проекте</option>
+        <option>Солнечная станция</option>
+        <option>Подводный кабель</option>
+        <option>Экология и охрана наследия</option>
+        <option>Сроки и этапы</option>
+        <option>Другое</option>
+      </select>
+
+      <label for="msg">Ваш вопрос</label>
+      <textarea id="msg" placeholder="Опишите ваш вопрос как можно подробнее..." required></textarea>
+
+      <button type="submit" class="btn">Отправить вопрос</button>
+      <div class="form-note">Нажимая кнопку, вы соглашаетесь с политикой обработки персональных данных.</div>
+      <div class="success" id="successMsg">✅ Спасибо! Ваш вопрос отправлен. Мы ответим на указанный e-mail.</div>
+    </form>
+  </section>
+
+</main>
+
+<footer>
+  © 2025 Цифровой центр проекта · Все права защищены
+</footer>
+
+<script>
+  const buttons = document.querySelectorAll('.tab-btn');
+  const contents = document.querySelectorAll('.tab-content');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  document.getElementById('questionForm').addEventListener('submit', e => {
+    e.preventDefault();
+    document.getElementById('successMsg').style.display = 'block';
+    e.target.reset();
+  });
+</script>
+
+</body>
+</html>
